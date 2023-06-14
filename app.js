@@ -2,12 +2,13 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-var mysql = require('mysql');
-var connection = mysql.createConnection({
+const mysql = require('mysql2');
+
+const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'me',
-    password: 'secret',
-    database: 'my_db'
+    user: 'root',
+    password: 'telesca1234',
+    database: 'usuarios'
 });
 
 app.use(express.json());
@@ -17,22 +18,30 @@ app.get('/', (req, res) => {
     res.render('index')
 })
 
+app.get('/usuarios', (req, res) => {
+    connection.query(
+        'select * from persona',
+        function (err, results, fields) {
+            console.log(results);
+            res.render('usuarios', { usuarios: results })
+        }
+    );
+})
+
 app.get('/formulario', (req, res) => {
-
-    connection.connect();
-
-    connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
-        if (error) throw error;
-        console.log('The solution is: ', results[0].solution);
-    });
-
-    connection.end();
-
     res.render('formulario')
 })
 
 app.post('/formulario', (req, res) => {
     console.log(req.body)
+
+    connection.execute(
+        `insert into Persona (nombre, email) values ('${req.body.nombre}', '${req.body.email}')`,
+        function (err, results, fields) {
+            console.log(results);
+        }
+    );
+
     res.render('completo', { nombre: req.body.nombre, email: req.body.email })
 })
 
